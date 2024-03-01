@@ -25,7 +25,7 @@ public class BoomEffect implements Runnable {
 		try {
 			while(true) {
 				if (_timeCountDown == 0) {
-					_gameManager.fire(this);
+					_gameManager.removeBoomEffect(this);
 					break;
 				} else {
 					_timeCountDown-=_timeCountDown;

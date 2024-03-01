@@ -47,23 +47,23 @@ public class GameManager {
 	public void addBoom(int x, int y) {
 		int row = (int)(x + 20) / 40;
 		int col = (int)(y + 20) / 40;
-		if (_map.getMatrixMap()[row][col] == 1){
+		if (_map.getMatrixMap()[row][col].isCanEnter() == true){
 			Boom boom = new Boom(row, col, 3, this);
 			_booms.add(boom);
 		}
 	}
 
 	public void boomBoomBoom(Boom boom) {
-//		BoomEffect boomEffect = new BoomEffect(boom.get_row(), boom.get_col(), 0.4, this);
-//		_boomEffects.add(boomEffect);
+		BoomEffect boomEffect = new BoomEffect(boom.get_row(), boom.get_col(), 1, this);
+		_boomEffects.add(boomEffect);
 		handleBoomEffect(boom);
 	}
 	
 	public void handleBoomEffect(Boom boom) {
-		int[][] _matrixMap = _map.getMatrixMap();
+		Area[][] _matrixMap = _map.getMatrixMap();
 		int row = boom.get_row();
 		int col = boom.get_col();
-	    int totalCells = 2;
+	    int totalCells = 4 * _character.getBombImpactLength();
 	    int lengthEffect = 0;
 	    boolean canUp = true;
 	    boolean canDown = true;
@@ -71,34 +71,30 @@ public class GameManager {
 	    boolean canRight = true;
 	    while (totalCells > 0) {
 	    	lengthEffect++;
-	    	if (canDown && row + lengthEffect < 11 && _matrixMap[row + lengthEffect][col] == 1 && totalCells > 0) {
+	    	if (canDown && row + lengthEffect < 11 && _matrixMap[row + lengthEffect][col].isCanEnter() == true && totalCells > 0) {
 			    totalCells--;
-			    //_matrixMap[row + lengthEffect][col] = 3;
-			    BoomEffect boomEffect = new BoomEffect(row + lengthEffect, col, 1, null);
+			    BoomEffect boomEffect = new BoomEffect(row + lengthEffect, col, 1, this);
 			    _boomEffects.add(boomEffect);
 	    	} else {
 	    		canDown = false;
 	    	}
-	    	if (canUp && row - lengthEffect >=0 && _matrixMap[row - lengthEffect][col] == 1 && totalCells > 0) {
+	    	if (canUp && row - lengthEffect >=0 && _matrixMap[row - lengthEffect][col].isCanEnter() == true && totalCells > 0) {
 	    		totalCells--;
-	    		//_matrixMap[row - lengthEffect][col] = 3;
-	    		BoomEffect boomEffect = new BoomEffect(row - lengthEffect, col, 1, null);
+	    		BoomEffect boomEffect = new BoomEffect(row - lengthEffect, col, 1, this);
 			    _boomEffects.add(boomEffect);
 	    	} else {
 	    		canUp = false;
 	    	}
-	    	if (canRight && col + lengthEffect < 11 && _matrixMap[row][col + lengthEffect] == 1 && totalCells > 0) {
+	    	if (canRight && col + lengthEffect < 11 && _matrixMap[row][col + lengthEffect].isCanEnter() == true && totalCells > 0) {
 	    		totalCells--;
-	    		//_matrixMap[row][col + lengthEffect] = 3;
-	    		BoomEffect boomEffect = new BoomEffect(row, col + lengthEffect, 1, null);
+	    		BoomEffect boomEffect = new BoomEffect(row, col + lengthEffect, 1, this);
 			    _boomEffects.add(boomEffect);
 	    	} else {
 	    		canRight = false;
 	    	}
-	    	if (canLeft && col - lengthEffect >=0 && _matrixMap[row][col - lengthEffect] == 1 && totalCells > 0) {
+	    	if (canLeft && col - lengthEffect >=0 && _matrixMap[row][col - lengthEffect].isCanEnter() == true && totalCells > 0) {
 	    		totalCells--;
-	    		//_matrixMap[row][col - lengthEffect] = 3;
-	    		BoomEffect boomEffect = new BoomEffect(row, col - lengthEffect, 1, null);
+	    		BoomEffect boomEffect = new BoomEffect(row, col - lengthEffect, 1, this);
 			    _boomEffects.add(boomEffect);
 	    	} else {
 	    		canLeft = false;
@@ -106,11 +102,11 @@ public class GameManager {
 		}
 	};
 
-	public void removeBoom(Boom boom) {
+	public synchronized void removeBoom(Boom boom) {
 		_booms.remove(boom);
 	}
 
-	public void fire(BoomEffect boomEffect) {
-		_boomEffects.remove(boomEffect);
+	public synchronized void removeBoomEffect(BoomEffect boomEffect) {
+	    _boomEffects.remove(boomEffect);
 	}
 }
