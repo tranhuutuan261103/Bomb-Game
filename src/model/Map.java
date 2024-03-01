@@ -1,18 +1,17 @@
 package model;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Map extends Thread {
-	int[][] matrixMap;
+	Area[][] matrixMap;
 	int cellWidth = 40;
 	
 	public Map(String pathDB) {
+		ArrayList<Area> areas = DataBase.getInstance().getAreas();
 		File file = new File(pathDB);
 		Scanner scanner;
 		try {
@@ -20,7 +19,7 @@ public class Map extends Thread {
 		
 			int rows = 11;  // Update with the actual number of rows in your file
 	        int cols = 11;  // Update with the actual number of columns in your file
-	        matrixMap = new int[rows][cols];
+	        matrixMap = new Area[rows][cols];
 
 	        // Read the file content into the matrix
 	        for (int i = 0; i < rows; i++) {
@@ -29,7 +28,13 @@ public class Map extends Thread {
 	                String[] elements = line.split(" ");
 
 	                for (int j = 0; j < Math.min(cols, elements.length); j++) {
-	                    matrixMap[i][j] = Integer.parseInt(elements[j]);
+	                	int typeId = Integer.parseInt(elements[j]);
+	                	for (Area area : areas) {
+							if (area.getTypeId() == typeId) {
+								matrixMap[i][j] = new Area(typeId, area.isCanEnter(), area.getImageUrl());
+								break;
+							}
+						}
 	                }
 	            }
 	        }
@@ -42,31 +47,14 @@ public class Map extends Thread {
 		}
 	}
 	
-	public int[][] getMatrixMap() {
+	public Area[][] getMatrixMap() {
 		return matrixMap;
 	}
 	
 	public void renderUI(Graphics2D g2d) {
-		Image image = Toolkit.getDefaultToolkit().getImage("src/images/boxgo.png");
 		for (int i=0;i<11;i++) {
 			for(int j=0;j<11;j++) {
-				if (matrixMap[i][j] == 0) {
-					//g.drawImage(image, i * cellWidth, j * cellWidth, viewMain);
-					g2d.setColor(Color.CYAN);
-					//g2d.fillRect(i * cellWidth, j * cellWidth, cellWidth, cellWidth);
-					g2d.drawImage(image, i * cellWidth, j * cellWidth, cellWidth, cellWidth, null);
-				} else if (matrixMap[i][j] == 1) {
-					g2d.setColor(Color.BLACK);
-					g2d.fillRect(i * cellWidth, j * cellWidth, cellWidth, cellWidth);
-				} else if (matrixMap[i][j] == 2) {
-					g2d.setColor(Color.BLACK);
-					g2d.fillRect(i * cellWidth, j * cellWidth, cellWidth, cellWidth);
-					Image imageBoom = Toolkit.getDefaultToolkit().getImage("src/map/bomb.gif");
-					g2d.drawImage(imageBoom, i * cellWidth, j * cellWidth, cellWidth, cellWidth, null);
-				} else if (matrixMap[i][j] == 3) {
-					g2d.setColor(Color.RED);
-					g2d.fillRect(i * cellWidth, j * cellWidth, cellWidth, cellWidth);
-				}
+				matrixMap[i][j].renderUI(g2d, i * cellWidth, j * cellWidth);
 			}
 		}
 	}

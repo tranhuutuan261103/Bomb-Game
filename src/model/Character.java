@@ -15,6 +15,8 @@ public class Character implements Runnable {
 	
 	private int a = 2;
 	
+	private int bombImpactLength = 1;
+	
 	private JPanel _characterPanel;
 	
 	public Character(int x, int y, GameManager gameManager) {
@@ -59,7 +61,7 @@ public class Character implements Runnable {
     private boolean isColliding(double top,double left) {
         int row = (int)top / 40;
         int col = (int)left / 40;
-        return _gameManager.getMap().getMatrixMap()[row][col] == 0;
+        return _gameManager.getMap().getMatrixMap()[row][col].isCanEnter() == false;
     }
 
 	@Override
@@ -154,5 +156,13 @@ public class Character implements Runnable {
 	public void renderUI(Graphics2D g2d) {
 		Image image = Toolkit.getDefaultToolkit().getImage("src/images/klee.jpeg");
 		g2d.drawImage(image, x, y, 40, 40, null);
+	}
+
+	public int getBombImpactLength() {
+		return bombImpactLength;
+	}
+
+	public void setBombImpactLength(int bombImpactLength) {
+		this.bombImpactLength = bombImpactLength;
 	}
 }

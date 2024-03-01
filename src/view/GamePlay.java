@@ -39,6 +39,7 @@ public class GamePlay implements KeyListener, Runnable {
 			};
 		};
 		
+		_gamePlayPanel.setSize(_gameManager.getMap().getMatrixMap().length * 40, _gameManager.getMap().getMatrixMap().length * 40);
 		Thread thread = new Thread(this);
 		thread.start();
 	}
