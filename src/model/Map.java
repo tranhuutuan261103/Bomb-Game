@@ -31,7 +31,7 @@ public class Map extends Thread {
 	                	int typeId = Integer.parseInt(elements[j]);
 	                	for (Area area : areas) {
 							if (area.getTypeId() == typeId) {
-								matrixMap[i][j] = new Area(typeId, area.isCanEnter(), area.getImageUrl());
+								matrixMap[i][j] = new Area(area);
 								break;
 							}
 						}

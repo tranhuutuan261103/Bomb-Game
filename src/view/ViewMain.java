@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JFrame;
 
 import model.Character;
+import model.GameManager;
 
 public class ViewMain {
 	
@@ -20,7 +21,9 @@ public class ViewMain {
 	private static int heightHeader = 37;
 	//private int offset = 100;
 	Character _character;
+	GameManager _gameManager;
 	GamePlay gamePlayContainer;
+	GameInfo gameInfoContainer;
 	
 	BufferedImage img;
 
@@ -32,12 +35,21 @@ public class ViewMain {
 		_view.setLayout(new BorderLayout());
 		_view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		gamePlayContainer = new GamePlay(this);
-		_view.add(gamePlayContainer.getGamePlayPanel(), BorderLayout.CENTER);
-		_view.addKeyListener(gamePlayContainer);
+		_gameManager = new GameManager();
 		
-		Dimension screen = gamePlayContainer.getGamePlayPanel().getSize();
-		_view.setSize((int)screen.getWidth() + widthHeader, (int)screen.getHeight() + heightHeader);
+		gamePlayContainer = new GamePlay(_gameManager);
+		_view.addKeyListener(gamePlayContainer);
+		_view.add(gamePlayContainer.getGamePlayPanel(), BorderLayout.CENTER);
+		
+		gameInfoContainer = new GameInfo(_gameManager);
+		_view.add(gameInfoContainer.getGameInfoPanel(), BorderLayout.EAST);
+		
+		Dimension gamePlayContainerSize = gamePlayContainer.getGamePlayPanel().getSize();
+		Dimension gameInfoContainerSize = gameInfoContainer.getGameInfoPanel().getSize();
+		_view.setSize(
+				widthHeader + (int)gamePlayContainerSize.getWidth() + (int)gameInfoContainerSize.getWidth(), 
+				heightHeader + (int)gamePlayContainerSize.getHeight()
+			);
 		_view.setLocationRelativeTo(null);
 	}
 	

@@ -27,12 +27,13 @@ public class DataBase {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(":");
-                if (parts.length == 3) {
+                if (parts.length == 4) {
                     int typeId = Integer.parseInt(parts[0]);
                     boolean canEnter = Boolean.parseBoolean(parts[1]);
-                    String imageUrl = parts[2];
+                    boolean canDestroy = Boolean.parseBoolean(parts[2]);
+                    String imageUrl = parts[3];
 
-                    Area area = new Area(typeId, canEnter, imageUrl);
+                    Area area = new Area(typeId, canEnter, canDestroy, imageUrl);
                     areas.add(area);
                 }
             }
