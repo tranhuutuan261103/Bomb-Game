@@ -1,3 +1,3 @@
-1:true:src/images/areas/sango.jpg
-2:false:src/images/areas/boxsat.png
-3:false:src/images/areas/boxgo.png
+1:true:false:src/images/areas/sango.jpg
+2:false:false:src/images/areas/boxsat.png
+3:false:true:src/images/areas/boxgo.png

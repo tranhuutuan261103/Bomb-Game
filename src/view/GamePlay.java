@@ -16,9 +16,9 @@ public class GamePlay implements KeyListener, Runnable {
 	private JPanel _gamePlayPanel;
 	private GameManager _gameManager;
 	
-	public GamePlay(ViewMain viewMain) {
+	public GamePlay(GameManager gameManager) {
 		//_viewMain = viewMain;
-		_gameManager = new GameManager();
+		_gameManager = gameManager;
 		_gamePlayPanel = new JPanel() {
 			/**
 			 * 
@@ -33,6 +33,7 @@ public class GamePlay implements KeyListener, Runnable {
 				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				
 				_gameManager.renderMap(g2d);
+				_gameManager.renderItems(g2d);
 				_gameManager.renderBooms(g2d);
 				_gameManager.renderBoomEffects(g2d);
 				_gameManager.renderCharacter(g2d);

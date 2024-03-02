@@ -7,11 +7,21 @@ import java.awt.Toolkit;
 public class Area {
 	private int _typeId;
 	private boolean _canEnter;
+	private boolean _canDestroy;
 	private String _imageUrl;
-	public Area(int typeId, boolean canEnter, String imageUrl) {
+	
+	public Area(int typeId, boolean canEnter, boolean canDestroy, String imageUrl) {
 		this._typeId = typeId;
 		this._canEnter = canEnter;
+		this._canDestroy = canDestroy;
 		this._imageUrl = imageUrl;
+	}
+	
+	public Area(Area area) {
+		this._typeId = area._typeId;
+		this._canEnter = area._canEnter;
+		this._canDestroy = area._canDestroy;
+		this._imageUrl = area._imageUrl;
 	}
 	
 	public int getTypeId() {
@@ -22,12 +32,20 @@ public class Area {
 		this._typeId = _typeId;
 	}
 
-	public boolean isCanEnter() {
+	public boolean canEnter() {
 		return _canEnter;
 	}
 
 	public void setCanEnter(boolean _canEnter) {
 		this._canEnter = _canEnter;
+	}
+	
+	public boolean canDestroy() {
+		return _canDestroy;
+	}
+	
+	public void setCanDetroy(boolean canDestroy) {
+		this._canDestroy = canDestroy;
 	}
 
 	public String getImageUrl() {
