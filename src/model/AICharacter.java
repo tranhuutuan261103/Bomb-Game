@@ -12,7 +12,7 @@ public class AICharacter extends Character {
 
 	@Override
 	public void renderUI(Graphics2D g2d) {
-		Image image = Toolkit.getDefaultToolkit().getImage("src/images/slime.png");
+		Image image = Toolkit.getDefaultToolkit().getImage("src/images/slime-removebg-preview.png");
 		g2d.drawImage(image, getX(), getY(), 40, 40, null);
 		
 		if (getShieldDuration() > 0) {

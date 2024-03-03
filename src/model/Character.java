@@ -293,7 +293,7 @@ public class Character implements Runnable {
 	}
 
 	public void renderUI(Graphics2D g2d) {
-		Image image = Toolkit.getDefaultToolkit().getImage("src/images/klee.jpeg");
+		Image image = Toolkit.getDefaultToolkit().getImage("src/images/klee-removebg-preview.png");
 		g2d.drawImage(image, x, y, 40, 40, null);
 		
 		if (shieldDuration > 0) {
