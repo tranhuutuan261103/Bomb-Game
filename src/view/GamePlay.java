@@ -36,11 +36,12 @@ public class GamePlay implements KeyListener, Runnable {
 				_gameManager.renderItems(g2d);
 				_gameManager.renderBooms(g2d);
 				_gameManager.renderBoomEffects(g2d);
+				_gameManager.renderAICharacter(g2d);
 				_gameManager.renderCharacter(g2d);
 			};
 		};
 		
-		_gamePlayPanel.setSize(_gameManager.getMap().getMatrixMap().length * 40, _gameManager.getMap().getMatrixMap().length * 40);
+		_gamePlayPanel.setSize(_gameManager.getMap().getMatrixMap().length * 40, _gameManager.getMap().getMatrixMap()[0].length * 40);
 		Thread thread = new Thread(this);
 		thread.start();
 	}

@@ -1,3 +1,4 @@
-1:true:false:src/images/areas/sango.jpg
-2:false:false:src/images/areas/boxsat.png
-3:false:true:src/images/areas/boxgo.png
+1:true:false:src/images/areas/land.png
+2:false:true:src/images/areas/spider-plant.png
+3:false:false:src/images/areas/mansion.png
+4:false:true:src/images/areas/flower-pot.png

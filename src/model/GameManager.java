@@ -9,21 +9,31 @@ import model.item.ItemType;
 
 public class GameManager {
 	private Character _character;
+	private AICharacter _aiCharacter;
 	private Map _map;
 	private ArrayList<Boom> _booms;
 	private ArrayList<BoomEffect> _boomEffects;
 	private ArrayList<Item> _items;
 	
 	public GameManager() {
+		reset();
+	}
+	
+	public void reset() {
 		_map = new Map("src/db/map.txt");
-		_character = new Character(0, 0, this);
 		_booms = new ArrayList<>();
 		_boomEffects = new ArrayList<>();
 		_items = new ArrayList<>();
+		_character = new Character("Klee", 0, 0, this);
+		_aiCharacter = new AICharacter("Slime", (_map.getMatrixMap().length - 1) * 40, (_map.getMatrixMap()[0].length - 1) * 40, this);
 	}
 	
 	public Character getCharacter() {
 		return _character;
+	}
+	
+	public AICharacter getAICharacter() {
+		return _aiCharacter;
 	}
 	
 	public Map getMap() {
@@ -36,6 +46,10 @@ public class GameManager {
 	
 	public ArrayList<BoomEffect> getBoomEffects() {
 		return _boomEffects;
+	}
+	
+	public void renderAICharacter(Graphics2D g2d) {
+		_aiCharacter.renderUI(g2d);
 	}
 
 	public void renderCharacter(Graphics2D g2d) {
@@ -91,16 +105,16 @@ public class GameManager {
 	    boolean canRight = true;
 	    while (lengthEffect < _character.getBombImpactLength()) {
 	    	lengthEffect++;
-	    	if (canRight && row + lengthEffect < 11 && _matrixMap[row + lengthEffect][col].canEnter() == true) {
+	    	if (canRight && row + lengthEffect < _matrixMap.length && _matrixMap[row + lengthEffect][col].canEnter() == true) {
 			    BoomEffect boomEffect = new BoomEffect(row + lengthEffect, col, 1, this);
 			    _boomEffects.add(boomEffect);
-	    	} else if (canRight && row + lengthEffect < 11 
+	    	} else if (canRight && row + lengthEffect < _matrixMap.length 
 	    			&& _matrixMap[row + lengthEffect][col].canEnter() == false
 	    			&& _matrixMap[row + lengthEffect][col].canDestroy() == true
 	    		) {
 	    		BoomEffect boomEffect = new BoomEffect(row + lengthEffect, col, 1, this);
 			    _boomEffects.add(boomEffect);
-			    _matrixMap[row + lengthEffect][col] = new Area(1, true, false, "src/images/areas/sango.jpg");
+			    _matrixMap[row + lengthEffect][col] = new Area(1, true, false, "src/images/areas/land.png");
 			    setRandomItemGift(row + lengthEffect, col);
 			    
 			    canRight = false;
@@ -116,23 +130,23 @@ public class GameManager {
 	    		) {
 	    		BoomEffect boomEffect = new BoomEffect(row - lengthEffect, col, 1, this);
 			    _boomEffects.add(boomEffect);
-			    _matrixMap[row - lengthEffect][col] = new Area(1, true, false, "src/images/areas/sango.jpg");
+			    _matrixMap[row - lengthEffect][col] = new Area(1, true, false, "src/images/areas/land.png");
 			    setRandomItemGift(row - lengthEffect, col);
 			    
 			    canLeft = false;
 	    	} else {
 	    		canLeft = false;
 	    	}
-	    	if (canDown && col + lengthEffect < 11 && _matrixMap[row][col + lengthEffect].canEnter() == true) {
+	    	if (canDown && col + lengthEffect < _matrixMap[0].length && _matrixMap[row][col + lengthEffect].canEnter() == true) {
 	    		BoomEffect boomEffect = new BoomEffect(row, col + lengthEffect, 1, this);
 			    _boomEffects.add(boomEffect);
-	    	} else if (canDown && col + lengthEffect < 11 
+	    	} else if (canDown && col + lengthEffect < _matrixMap[0].length 
 	    			&& _matrixMap[row][col + lengthEffect].canEnter() == false
 	    			&& _matrixMap[row][col + lengthEffect].canDestroy() == true
 	    		) {
 	    		BoomEffect boomEffect = new BoomEffect(row, col + lengthEffect, 1, this);
 			    _boomEffects.add(boomEffect);
-			    _matrixMap[row][col + lengthEffect] = new Area(1, true, false, "src/images/areas/sango.jpg");
+			    _matrixMap[row][col + lengthEffect] = new Area(1, true, false, "src/images/areas/land.png");
 			    setRandomItemGift(row, col + lengthEffect);
 			    
 			    canDown = false;
@@ -148,7 +162,7 @@ public class GameManager {
 	    		) {
 	    		BoomEffect boomEffect = new BoomEffect(row, col - lengthEffect, 1, this);
 			    _boomEffects.add(boomEffect);
-			    _matrixMap[row][col - lengthEffect] = new Area(1, true, false, "src/images/areas/sango.jpg");
+			    _matrixMap[row][col - lengthEffect] = new Area(1, true, false, "src/images/areas/land.png");
 			    setRandomItemGift(row, col - lengthEffect);
 			    
 			    canUp = false;
@@ -158,25 +172,29 @@ public class GameManager {
 		}
 	};
 
-	public synchronized void removeBoom(Boom boom) {
-		_booms.remove(boom);
+	public void removeBoom(Boom boom) {
+		synchronized (_booms) {
+			_booms.remove(boom);
+		}
 	}
 
-	public synchronized void removeBoomEffect(BoomEffect boomEffect) {
-	    _boomEffects.remove(boomEffect);
+	public void removeBoomEffect(BoomEffect boomEffect) {
+		synchronized(_boomEffects) {
+			_boomEffects.remove(boomEffect);
+		}
 	}
 	
 	public synchronized void setRandomItemGift(int row, int col) {
 		Random random = new Random();
 		float randomValue = random.nextFloat();
-		if (randomValue >= 0 && randomValue < 0.1) {
+		if (randomValue >= 0 && randomValue < 0.05) {
 			_items.add(new Item(row, col, ItemType.HEART));
 		}
-		else if (randomValue >= 0.1 && randomValue < 0.5) {
+		else if (randomValue >= 0.05 && randomValue < 0.7) {
 			_items.add(new Item(row, col, ItemType.BOMB));
-		} else if (randomValue >= 0.5 && randomValue < 0.7) {
-			_items.add(new Item(row, col, ItemType.ACCUARY));
 		} else if (randomValue >= 0.7 && randomValue < 0.8) {
+			_items.add(new Item(row, col, ItemType.ACCUARY));
+		} else if (randomValue >= 0.8 && randomValue < 0.9) {
 			_items.add(new Item(row, col, ItemType.SPEED));
 		}
 	}
