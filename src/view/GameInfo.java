@@ -1,5 +1,7 @@
 package view;
 
+import java.awt.BorderLayout;
+import java.awt.Button;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -8,7 +10,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import model.GameManager;
@@ -31,24 +36,63 @@ public class GameInfo implements Runnable {
 				super.paintComponent(g);
 				Graphics2D g2d = (Graphics2D) g;
 				g2d.setStroke(new java.awt.BasicStroke(2));
-				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				
-				Image image = Toolkit.getDefaultToolkit().getImage("src/images/klee_profile.png");
-				g2d.drawImage(image, 10, 60, 180, 108, this);
-				
-				Font customFont = new Font(Font.SANS_SERIF, Font.BOLD, 16);
-				g2d.setFont(customFont);
-				
-				g2d.drawString(_gameManager.getCharacter().getHeart() + "", 140, 88);
-				g2d.drawString(_gameManager.getCharacter().getBombs() + "", 140, 110);
-				g2d.drawString(_gameManager.getCharacter().getBombImpactLength() + "", 140, 131);
-				g2d.drawString(_gameManager.getCharacter().getA() + "", 140, 153);
+				drawCharacterInnfo(g2d);
+				Image matchImg = Toolkit.getDefaultToolkit().getImage("src/images/match.png");
+				g2d.drawImage(matchImg, 72, 175, 50, 50,this);
+				drawAICharacterInnfo(g2d);
 			}
 		};
 		
 		this._gameInfoPanel.setSize(200, 400);
 		this._gameInfoPanel.setPreferredSize(new Dimension(200, 400));
-		this._gameInfoPanel.setBackground(new Color(95, 210, 252)); // 245/ 206/ 231
+		//this._gameInfoPanel.setBackground(new Color(95, 210, 252)); // 245/ 206/ 231
+		
+		this._gameInfoPanel.setLayout(new BorderLayout());
+		Button playAgainBtn = new Button("Play again!");
+		playAgainBtn.setFocusable(false);
+		playAgainBtn.setPreferredSize(new Dimension(100, 50));
+		playAgainBtn.setBackground(new Color(253, 132, 16));
+		playAgainBtn.setForeground(Color.WHITE);
+		playAgainBtn.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 20));
+		playAgainBtn.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String[] buttons = { "Yes", "No" };
+
+			    int rc = JOptionPane.showOptionDialog(null, "Are you sure play again ?", "Confirmation",
+			        JOptionPane.WARNING_MESSAGE, 1, null, buttons, buttons[1]);
+
+			    if (rc == 0)
+			    	_gameManager.reset();
+			}
+		});
+		this._gameInfoPanel.add(playAgainBtn, BorderLayout.SOUTH);
 		
 		Thread thread = new Thread(this);
 		thread.start();
@@ -56,6 +100,37 @@ public class GameInfo implements Runnable {
 	
 	public JPanel getGameInfoPanel() {
 		return _gameInfoPanel;
+	}
+	
+	private void drawCharacterInnfo(Graphics2D g2d) {
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		
+		Image image = Toolkit.getDefaultToolkit().getImage("src/images/klee_profile.png");
+		g2d.drawImage(image, 10, 60, 180, 108, null);
+		
+		Font customFont = new Font(Font.SANS_SERIF, Font.BOLD, 16);
+		g2d.setFont(customFont);
+		
+		g2d.drawString(_gameManager.getCharacter().getHeart() + "", 140, 88);
+		g2d.drawString(_gameManager.getCharacter().getBombs() + "", 140, 110);
+		g2d.drawString(_gameManager.getCharacter().getBombImpactLength() + "", 140, 131);
+		g2d.drawString(_gameManager.getCharacter().getA() + "", 140, 153);
+	}
+	
+	private void drawAICharacterInnfo(Graphics2D g2d) {
+		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		
+		Image image = Toolkit.getDefaultToolkit().getImage("src/images/slime_profile.png");
+		int margin = 70;
+		g2d.drawImage(image, 10, margin + 162, 10 + 180, margin + 162 + 108, 3, 10, 620, 390, null);
+		
+		Font customFont = new Font(Font.SANS_SERIF, Font.BOLD, 16);
+		g2d.setFont(customFont);
+		
+		g2d.drawString(_gameManager.getAICharacter().getHeart() + "", 140, margin + 188);
+		g2d.drawString(_gameManager.getAICharacter().getBombs() + "", 140, margin + 210);
+		g2d.drawString(_gameManager.getAICharacter().getBombImpactLength() + "", 140, margin + 231);
+		g2d.drawString(_gameManager.getAICharacter().getA() + "", 140, margin + 253);
 	}
 	
 	@Override

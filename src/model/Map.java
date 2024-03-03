@@ -17,9 +17,9 @@ public class Map extends Thread {
 		try {
 			scanner = new Scanner(file);
 		
-			int rows = 11;  // Update with the actual number of rows in your file
-	        int cols = 11;  // Update with the actual number of columns in your file
-	        matrixMap = new Area[rows][cols];
+			int rows = 13;  // Update with the actual number of rows in your file
+	        int cols = 15;  // Update with the actual number of columns in your file
+	        matrixMap = new Area[cols][rows];
 
 	        // Read the file content into the matrix
 	        for (int i = 0; i < rows; i++) {
@@ -31,7 +31,7 @@ public class Map extends Thread {
 	                	int typeId = Integer.parseInt(elements[j]);
 	                	for (Area area : areas) {
 							if (area.getTypeId() == typeId) {
-								matrixMap[i][j] = new Area(area);
+								matrixMap[j][i] = new Area(area);
 								break;
 							}
 						}
@@ -52,8 +52,8 @@ public class Map extends Thread {
 	}
 	
 	public void renderUI(Graphics2D g2d) {
-		for (int i=0;i<11;i++) {
-			for(int j=0;j<11;j++) {
+		for (int i=0 ; i < matrixMap.length ; i++) {
+			for(int j=0 ; j < matrixMap[0].length ; j++) {
 				matrixMap[i][j].renderUI(g2d, i * cellWidth, j * cellWidth);
 			}
 		}

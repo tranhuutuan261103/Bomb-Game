@@ -57,7 +57,12 @@ public class Area {
 	}
 
 	public void renderUI(Graphics2D g2d,int x,int y) {
-		Image image = Toolkit.getDefaultToolkit().getImage(_imageUrl);
-		g2d.drawImage(image, x, y, 40, 40, null);
+		Image backImg = Toolkit.getDefaultToolkit().getImage("src/images/areas/land.png");
+		g2d.drawImage(backImg, x, y, 40, 40, null);
+		
+		if (_imageUrl.compareTo("src/images/areas/land.png") != 0) {
+			Image image = Toolkit.getDefaultToolkit().getImage(_imageUrl);
+			g2d.drawImage(image, x, y, 40, 40, null);
+		}
 	}
 }

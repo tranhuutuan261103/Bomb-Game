@@ -34,6 +34,7 @@ public class ViewMain {
 		_view.setIconImage(image);
 		_view.setLayout(new BorderLayout());
 		_view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		_view.setResizable(false);
 		
 		_gameManager = new GameManager();
 		
