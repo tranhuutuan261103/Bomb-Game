@@ -26,6 +26,7 @@ public class GameManager {
 		_items = new ArrayList<>();
 		_character = new Character("Klee", 0, 0, this);
 		_aiCharacter = new AICharacter("Slime", (_map.getMatrixMap().length - 1) * 40, (_map.getMatrixMap()[0].length - 1) * 40, this);
+		_aiCharacter.setVx(-_aiCharacter.getA());
 	}
 	
 	public Character getCharacter() {
@@ -42,6 +43,10 @@ public class GameManager {
 	
 	public ArrayList<Item> getItems() {
 		return _items;
+	}
+
+	public ArrayList<Boom> getBooms() {
+		return _booms;
 	}
 	
 	public ArrayList<BoomEffect> getBoomEffects() {
