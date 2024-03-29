@@ -1,14 +1,9 @@
 package model;
 
-import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Label;
 import java.awt.Toolkit;
 import java.util.Iterator;
-
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import model.item.Item;
@@ -17,6 +12,7 @@ import model.item.ItemType;
 public class CharacterBase {
     protected GameManager _gameManager;
 	protected String _characterName;
+	protected String _characterImage;
 	protected int x;
 	protected int y;
 	protected int vx;
@@ -30,18 +26,33 @@ public class CharacterBase {
 	
 	protected int shieldDuration = 300;
 	
+	protected int plantedBombLimit = 1;
+	protected int plantedBombCount = 0;
 	
 	protected JPanel _characterPanel;
 	
 	public CharacterBase(String characterName, int x, int y, GameManager gameManager) {
 		_gameManager = gameManager;
 		this._characterName = characterName;
+		this._characterImage = "src/images/klee-removebg-preview.png";
 		this.x = x;
 		this.y = y;
 		this.vx = 0;
 		this.vy = 0;
 		this.setHeart(1);
-		this.setBombs(10);
+		this.setBombs(100);
+	}
+
+	public CharacterBase(String characterName, int x, int y, GameManager gameManager, String characterImage) {
+		_gameManager = gameManager;
+		this._characterName = characterName;
+		this._characterImage = characterImage;
+		this.x = x;
+		this.y = y;
+		this.vx = 0;
+		this.vy = 0;
+		this.setHeart(1);
+		this.setBombs(100);
 	}
 	
 	public int getX() {
@@ -132,27 +143,20 @@ public class CharacterBase {
     	}
     }
     
-    protected void checkDie() {
+    protected void hitByBomb() {
         int row = (int) (x + 20) / 40;
         int col = (int) (y + 20) / 40;
         synchronized (_gameManager.getBoomEffects()) {
-        Iterator<BoomEffect> iterator = _gameManager.getBoomEffects().iterator();
+        	Iterator<BoomEffect> iterator = _gameManager.getBoomEffects().iterator();
 	        while (iterator.hasNext()) {
 	            BoomEffect boomEffect = iterator.next();
-	            if (boomEffect.get_row() == row && boomEffect.get_col() == col) {
+	            if (boomEffect.get_row() == row && boomEffect.get_col() == col && boomEffect.get_isDestroyed() == true) {
 	                if (shieldDuration == 0) {
 	                    if (heart > 1) {
 	                        heart -= 1;
 	                        shieldDuration = 300;
 	                    } else {
 	                    	heart = 0;
-	                    	
-	                    	JPanel panel = new JPanel();
-	                    	panel.setLayout(new BorderLayout());
-	                    	Label label = new Label(_characterName + " died!");
-	                    	label.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 24));
-	                    	panel.add(label, BorderLayout.CENTER);
-	                        JOptionPane.showMessageDialog(null, panel, "Result", JOptionPane.PLAIN_MESSAGE);
 	                    }
 	                }
 	                break;
@@ -162,7 +166,7 @@ public class CharacterBase {
     }
 
 	public void renderUI(Graphics2D g2d) {
-		Image image = Toolkit.getDefaultToolkit().getImage("src/images/klee-removebg-preview.png");
+		Image image = Toolkit.getDefaultToolkit().getImage("src/images/characters/klee-removebg-preview.png");
 		g2d.drawImage(image, x, y, 40, 40, null);
 		
 		if (shieldDuration > 0) {
@@ -193,5 +197,37 @@ public class CharacterBase {
 
 	public void setBombs(int bombs) {
 		this.bombs = bombs;
+	}
+
+	public int getPlantedBombLimit() {
+		return plantedBombLimit;
+	}
+
+	public void setPlantedBombLimit(int plantedBombLimit) {
+		this.plantedBombLimit = plantedBombLimit;
+	}
+
+	public int getPlantedBombCount() {
+		return plantedBombCount;
+	}
+
+	public void setPlantedBombCount(int plantedBombCount, boolean needWait) {
+		if (needWait) {
+			Thread thread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(500);
+						setPlantedBombCount(plantedBombCount, false);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+
+			thread.start();
+		} else {
+			this.plantedBombCount = plantedBombCount;
+		}
 	}
 }

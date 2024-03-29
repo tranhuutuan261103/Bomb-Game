@@ -1,19 +1,29 @@
 package model;
 
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
 
 import model.item.Item;
 import model.item.ItemType;
+import utils.*;
 
 public class GameManager {
 	private Character _character;
-	private AICharacter _aiCharacter;
+	private ArrayList<AICharacter> _aiCharacters;
 	private Map _map;
 	private ArrayList<Boom> _booms;
 	private ArrayList<BoomEffect> _boomEffects;
 	private ArrayList<Item> _items;
+	private ArrayList<DirectionPoint> _directionPoints = new ArrayList<>(){
+		{
+			add(new DirectionPoint(Direction.UP, new Point(0, -1)));
+			add(new DirectionPoint(Direction.DOWN, new Point(0, 1)));
+			add(new DirectionPoint(Direction.LEFT, new Point(-1, 0)));
+			add(new DirectionPoint(Direction.RIGHT, new Point(1, 0)));
+		}
+	};
 	
 	public GameManager() {
 		reset();
@@ -25,16 +35,18 @@ public class GameManager {
 		_boomEffects = new ArrayList<>();
 		_items = new ArrayList<>();
 		_character = new Character("Klee", 0, 0, this);
-		_aiCharacter = new AICharacter("Slime", (_map.getMatrixMap().length - 1) * 40, (_map.getMatrixMap()[0].length - 1) * 40, this);
-		_aiCharacter.setVx(-_aiCharacter.getA());
+		_aiCharacters = new ArrayList<>();
+		_aiCharacters.add(new AICharacter("Slime Electro", 0, (_map.getMatrixMap()[0].length - 1) * 40, this, "src/images/characters/slime_electro-removebg.png"));
+		_aiCharacters.add(new AICharacter("Slime Dendro", (_map.getMatrixMap().length - 1) * 40, 0, this, "src/images/characters/slime_dendro-removebg.png"));
+		_aiCharacters.add(new AICharacter("Slime Hydro", (_map.getMatrixMap().length - 1) * 40, (_map.getMatrixMap()[0].length - 1) * 40, this, "src/images/characters/slime_hydro-removebg.png"));
 	}
 	
 	public Character getCharacter() {
 		return _character;
 	}
 	
-	public AICharacter getAICharacter() {
-		return _aiCharacter;
+	public ArrayList<AICharacter> getAICharacters() {
+		return _aiCharacters;
 	}
 	
 	public Map getMap() {
@@ -54,7 +66,9 @@ public class GameManager {
 	}
 	
 	public void renderAICharacter(Graphics2D g2d) {
-		_aiCharacter.renderUI(g2d);
+		for (AICharacter aiCharacter : _aiCharacters) {
+			aiCharacter.renderUI(g2d);
+		}
 	}
 
 	public void renderCharacter(Graphics2D g2d) {
@@ -87,99 +101,67 @@ public class GameManager {
 		int row = (int)(x + 20) / 40;
 		int col = (int)(y + 20) / 40;
 		if (_map.getMatrixMap()[row][col].canEnter() == true && _character.getBombs() > 0){
-			Boom boom = new Boom(row, col, 3, this);
+			Boom boom = new Boom(row, col, 3, this, _character);
 			this._character.setBombs(_character.getBombs() - 1);
 			_booms.add(boom);
+			addBoomEffects(boom);
 		}
 	}
 
-	public void boomBoomBoom(Boom boom) {
-		BoomEffect boomEffect = new BoomEffect(boom.get_row(), boom.get_col(), 1, this);
-		_boomEffects.add(boomEffect);
-		handleBoomEffect(boom);
-	}
-	
-	public void handleBoomEffect(Boom boom) {
-		Area[][] _matrixMap = _map.getMatrixMap();
-		int row = boom.get_row();
-		int col = boom.get_col();
-	    int lengthEffect = 0;
-	    boolean canUp = true;
-	    boolean canDown = true;
-	    boolean canLeft = true;
-	    boolean canRight = true;
-	    while (lengthEffect < _character.getBombImpactLength()) {
-	    	lengthEffect++;
-	    	if (canRight && row + lengthEffect < _matrixMap.length && _matrixMap[row + lengthEffect][col].canEnter() == true) {
-			    BoomEffect boomEffect = new BoomEffect(row + lengthEffect, col, 1, this);
-			    _boomEffects.add(boomEffect);
-	    	} else if (canRight && row + lengthEffect < _matrixMap.length 
-	    			&& _matrixMap[row + lengthEffect][col].canEnter() == false
-	    			&& _matrixMap[row + lengthEffect][col].canDestroy() == true
-	    		) {
-	    		BoomEffect boomEffect = new BoomEffect(row + lengthEffect, col, 1, this);
-			    _boomEffects.add(boomEffect);
-			    _matrixMap[row + lengthEffect][col] = new Area(1, true, false, "src/images/areas/land.png");
-			    setRandomItemGift(row + lengthEffect, col);
-			    
-			    canRight = false;
-	    	} else {
-	    		canRight = false;
-	    	}
-	    	if (canLeft && row - lengthEffect >= 0 && _matrixMap[row - lengthEffect][col].canEnter() == true) {
-	    		BoomEffect boomEffect = new BoomEffect(row - lengthEffect, col, 1, this);
-			    _boomEffects.add(boomEffect);
-	    	} else if (canLeft && row - lengthEffect >= 0 
-	    			&& _matrixMap[row - lengthEffect][col].canEnter() == false
-	    			&& _matrixMap[row - lengthEffect][col].canDestroy() == true
-	    		) {
-	    		BoomEffect boomEffect = new BoomEffect(row - lengthEffect, col, 1, this);
-			    _boomEffects.add(boomEffect);
-			    _matrixMap[row - lengthEffect][col] = new Area(1, true, false, "src/images/areas/land.png");
-			    setRandomItemGift(row - lengthEffect, col);
-			    
-			    canLeft = false;
-	    	} else {
-	    		canLeft = false;
-	    	}
-	    	if (canDown && col + lengthEffect < _matrixMap[0].length && _matrixMap[row][col + lengthEffect].canEnter() == true) {
-	    		BoomEffect boomEffect = new BoomEffect(row, col + lengthEffect, 1, this);
-			    _boomEffects.add(boomEffect);
-	    	} else if (canDown && col + lengthEffect < _matrixMap[0].length 
-	    			&& _matrixMap[row][col + lengthEffect].canEnter() == false
-	    			&& _matrixMap[row][col + lengthEffect].canDestroy() == true
-	    		) {
-	    		BoomEffect boomEffect = new BoomEffect(row, col + lengthEffect, 1, this);
-			    _boomEffects.add(boomEffect);
-			    _matrixMap[row][col + lengthEffect] = new Area(1, true, false, "src/images/areas/land.png");
-			    setRandomItemGift(row, col + lengthEffect);
-			    
-			    canDown = false;
-	    	} else {
-	    		canDown = false;
-	    	}
-	    	if (canUp && col - lengthEffect >= 0 && _matrixMap[row][col - lengthEffect].canEnter() == true) {
-	    		BoomEffect boomEffect = new BoomEffect(row, col - lengthEffect, 1, this);
-			    _boomEffects.add(boomEffect);
-	    	} else if (canUp && col - lengthEffect >= 0 
-	    			&& _matrixMap[row][col - lengthEffect].canEnter() == false
-	    			&& _matrixMap[row][col - lengthEffect].canDestroy() == true
-	    		) {
-	    		BoomEffect boomEffect = new BoomEffect(row, col - lengthEffect, 1, this);
-			    _boomEffects.add(boomEffect);
-			    _matrixMap[row][col - lengthEffect] = new Area(1, true, false, "src/images/areas/land.png");
-			    setRandomItemGift(row, col - lengthEffect);
-			    
-			    canUp = false;
-	    	} else {
-	    		canUp = false;
-	    	}
+	private boolean checkCollision(int row, int col) {
+		if (row < 0 || row >= _map.getMatrixMap().length || col < 0 || col >= _map.getMatrixMap()[0].length) {
+			return true;
 		}
-	};
 
-	public void removeBoom(Boom boom) {
-		synchronized (_booms) {
+		if (_map.getMatrixMap()[row][col].canEnter() == false && _map.getMatrixMap()[row][col].canDestroy() == false){
+			return true;
+		}
+		return false;
+	}
+
+	public void addBoomEffects(Boom boom) {
+		if (checkCollision(boom.get_row(), boom.get_col()) == false) {
+			BoomEffect boomEffect = new BoomEffect(boom.get_row(), boom.get_col(), 3, this);
+			_boomEffects.add(boomEffect);
+		}
+
+		for (DirectionPoint directionPoint : _directionPoints) {
+			int row = boom.get_row();
+			int col = boom.get_col();
+			for (int i = 1; i <= _character.getBombImpactLength(); i++) {
+				row += directionPoint.point.x;
+				col += directionPoint.point.y;
+				if (checkCollision(row, col) == true) {
+					break;
+				}
+				BoomEffect boomEffect = new BoomEffect(row, col, 3, this);
+				_boomEffects.add(boomEffect);
+			}
+		}
+	}
+
+	public void makeBombExplode(Boom boom) {
+		CharacterBase character = null;
+		if(boom.getCharacter() instanceof Character) {
+			character = _character;
+		} else {
+			for(AICharacter aiCharacter : _aiCharacters) {
+				if(aiCharacter == boom.getCharacter()) {
+					character = aiCharacter;
+					break;
+				}
+			}
+		}
+		character.setPlantedBombCount(boom.getCharacter().getPlantedBombCount() - 1, true);
+		synchronized(_booms) {
 			_booms.remove(boom);
+		}
+	}
+
+	public void makeBoomEffectExplode(BoomEffect boomEffect) {
+		if (_map.getMatrixMap()[boomEffect.get_row()][boomEffect.get_col()].canDestroy() == true){
+			_map.getMatrixMap()[boomEffect.get_row()][boomEffect.get_col()] = new Area(1, true, false, "src/images/areas/land.png");
+			setRandomItemGift(boomEffect.get_row(), boomEffect.get_col());
 		}
 	}
 
@@ -199,7 +181,7 @@ public class GameManager {
 			_items.add(new Item(row, col, ItemType.BOMB));
 		} else if (randomValue >= 0.7 && randomValue < 0.8) {
 			_items.add(new Item(row, col, ItemType.ACCUARY));
-		} else if (randomValue >= 0.8 && randomValue < 0.9) {
+		} else if (randomValue >= 0.8 && randomValue < 0.8) {
 			_items.add(new Item(row, col, ItemType.SPEED));
 		}
 	}
