@@ -1,5 +1,8 @@
 package model;
 
+import utils.Direction;
+import utils.DirectionPoint;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.awt.Point;
@@ -22,8 +25,14 @@ public class AICharacter extends CharacterBase implements Runnable {
 	private Direction direction = Direction.UP;
 	private boolean planted_bomb = false;
 
-	public AICharacter(String characterName, int x, int y, GameManager gameManager) {
-		super(characterName, x, y, gameManager);
+	private int numRow = 15;
+	private int numCol = 13;
+
+	public AICharacter(String characterName, int x, int y, GameManager gameManager, String characterImage) {
+		super(characterName, x, y, gameManager, characterImage);
+
+		numRow = gameManager.getMap().getMatrixMap().length;
+		numCol = gameManager.getMap().getMatrixMap()[0].length;
 
 		Thread thread = new Thread(this);
 		thread.start();
@@ -33,7 +42,6 @@ public class AICharacter extends CharacterBase implements Runnable {
 		State[][] grid = new State[_gameManager.getMap().getMatrixMap().length][_gameManager.getMap().getMatrixMap()[0].length];
 		for (int i = 0; i < _gameManager.getMap().getMatrixMap().length; i++) {
 			for (int j = 0; j < _gameManager.getMap().getMatrixMap()[0].length; j++) {
-				grid[i][j] = State.SAFE;
 				if (_gameManager.getMap().getMatrixMap()[i][j].canEnter() == true) {
 					grid[i][j] = State.SAFE;
 				} else if (_gameManager.getMap().getMatrixMap()[i][j].canDestroy() == true) {
@@ -48,18 +56,36 @@ public class AICharacter extends CharacterBase implements Runnable {
 			BoomEffect boomEffect = _gameManager.getBoomEffects().get(i);
 			int row = boomEffect.get_row();
 			int col = boomEffect.get_col();
-			grid[row][col] = State.UNSAFE;
+			if (_gameManager.getMap().getMatrixMap()[row][col].canDestroy() == true) {
+				grid[row][col] = State.DESTROYABLE;
+			} else if (grid[row][col] == State.SAFE) {
+				if (boomEffect.get_isDestroyed() == false) {
+					grid[row][col] = State.UNSAFE;
+				} else {
+					grid[row][col] = State.VERYDANGER;
+				}
+			}
 		}
 
 		Character character = _gameManager.getCharacter();
-		int row = (int) (character.getX() / 40);
-		int col = (int) (character.getY() / 40);
-		grid[row][col] = State.UNREACHABLE;
+		if (character.getHeart() > 0) {
+			int row = (int) (character.getX() / 40);
+			int col = (int) (character.getY() / 40);
+			grid[row][col] = State.DESTROYABLE;
+		}
+
+		for (AICharacter aiCharacter : _gameManager.getAICharacters()) {
+			int row = (int) (aiCharacter.getX() / 40);
+			int col = (int) (aiCharacter.getY() / 40);
+			if (this != aiCharacter) {
+				grid[row][col] = State.DESTROYABLE;
+			}
+		}
 
 		for (int i = 0; i < _gameManager.getBooms().size(); i++) {
 			Boom boom = _gameManager.getBooms().get(i);
-			row = boom.get_row();
-			col = boom.get_col();
+			int row = boom.get_row();
+			int col = boom.get_col();
 			grid[row][col] = State.UNREACHABLE;
 		}
 
@@ -114,7 +140,10 @@ public class AICharacter extends CharacterBase implements Runnable {
 				State grid[][] = createGrid();
 				// get the next direction
 				Point next = _path.get(1);
-				if (grid[next.x][next.y] == State.DESTROYABLE || grid[next.x][next.y] == State.UNREACHABLE) {
+				if (grid[next.x][next.y] == State.DESTROYABLE 
+				|| grid[next.x][next.y] == State.UNREACHABLE 
+				|| grid[next.x][next.y] == State.FOUND 
+				|| grid[next.x][next.y] == State.VERYDANGER) {
 					_directions.clear();
 					_path.clear();
 					return;
@@ -125,12 +154,19 @@ public class AICharacter extends CharacterBase implements Runnable {
 
 	private void makeMove() {
 		if (_directions.isEmpty()) {
-			if (planted_bomb == true){
-				_gameManager.getBooms().add(new Boom((x + 20) / 40, (y + 20) / 40, 3, _gameManager));
-				planted_bomb = false;
+			if (planted_bomb == true) {
+				if (plantedBombCount < plantedBombLimit){
+					Boom boom = new Boom((int) (x / 40), (int) (y / 40), 3, _gameManager, this);
+					_gameManager.getBooms().add(boom);
+					_gameManager.addBoomEffects(boom);
+					bombs -= 1;
+					plantedBombCount += 1;
+					planted_bomb = false;
+				}
 			}
 			dfs(createGrid());
 		} else {
+			direction = _directions.peek();
 			move();
 		}
 	}
@@ -139,7 +175,7 @@ public class AICharacter extends CharacterBase implements Runnable {
 		LinkedList<Point> newPath = new LinkedList<Point>();
 		newPath.add(new Point((int) (x / 40), (int) (y / 40)));
 		int depth = 0;
-		if (this.getBombs() == 0) {
+		if (this.getBombs() == 0 || this.getPlantedBombCount() == this.getPlantedBombLimit()){
 			dfsHelper(State.SAFE, grid, newPath, depth);
 		} else {
 			dfsHelper(State.DESTROYABLE, grid, newPath, depth);
@@ -157,14 +193,14 @@ public class AICharacter extends CharacterBase implements Runnable {
 		if (grid[last.x][last.y] == State.SAFE && endCondition == State.SAFE) {
 			return;
 		} else if (endCondition == State.DESTROYABLE) {
-			if ((last.x + 1 < 15 && grid[last.x + 1][last.y] == endCondition)
+			if ((last.x + 1 < numRow && grid[last.x + 1][last.y] == endCondition)
 			|| (last.x > 0 && grid[last.x - 1][last.y] == endCondition)
-			|| (last.y + 1 < 13 && grid[last.x][last.y + 1] == endCondition)
+			|| (last.y + 1 < numCol && grid[last.x][last.y + 1] == endCondition)
 			|| (last.y > 0 && grid[last.x][last.y - 1] == endCondition)) {
-				if (_path.size() == 1 && endCondition == State.DESTROYABLE) {
+				if (path.size() > 1 && endCondition == State.DESTROYABLE) {
 					planted_bomb = true;
+					return;
 				}
-				return;
 			}
 		}
 
@@ -176,7 +212,7 @@ public class AICharacter extends CharacterBase implements Runnable {
 		for (DirectionPoint directionPoint : _directionPoints) {
 			int x = last.x + directionPoint.point.x;
 			int y = last.y + directionPoint.point.y;
-			if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) {
+			if (x < 0 || x >= numRow || y < 0 || y >= numCol) {
 				continue;
 			}
 			if (grid[x][y] == State.SAFE) {
@@ -192,6 +228,9 @@ public class AICharacter extends CharacterBase implements Runnable {
 			for (DirectionPoint directionPoint : _directionPoints) {
 				int x = last.x + directionPoint.point.x;
 				int y = last.y + directionPoint.point.y;
+				if (x < 0 || x >= numRow || y < 0 || y >= numCol) {
+					continue;
+				}
 				if (grid[x][y] == State.UNSAFE) {
 					path.add(new Point(x, y));
 					_directions.add(directionPoint.direction);
@@ -216,12 +255,17 @@ public class AICharacter extends CharacterBase implements Runnable {
 	public void run() {
 		while (true) {
 			try {
+				if (heart > 0) {
+					hitByBomb();
+				}
+				if (heart == 0) {
+					System.out.println(_characterName + " is dead");
+					break;
+				}
 				reduceSpeed();
 				reduceShieldDuration();
 				getItemGift();
-				checkDie();
 				makeMove();
-				//showState(grid);
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -231,7 +275,7 @@ public class AICharacter extends CharacterBase implements Runnable {
 
 	@Override
 	public void renderUI(Graphics2D g2d) {
-		Image image = Toolkit.getDefaultToolkit().getImage("src/images/slime-removebg-preview.png");
+		Image image = Toolkit.getDefaultToolkit().getImage(_characterImage);
 		g2d.drawImage(image, getX(), getY(), 40, 40, null);
 		
 		if (getShieldDuration() > 0) {
@@ -241,20 +285,6 @@ public class AICharacter extends CharacterBase implements Runnable {
 	}
 }
 
-enum Direction {
-	UP, DOWN, LEFT, RIGHT
-}
-
 enum State {
-	SAFE, UNSAFE, DESTROYABLE, UNREACHABLE, FOUND
-}
-
-class DirectionPoint {
-	Direction direction;
-	Point point;
-
-	public DirectionPoint(Direction direction, Point point) {
-		this.direction = direction;
-		this.point = point;
-	}
+	SAFE, UNSAFE, DESTROYABLE, UNREACHABLE, FOUND, VERYDANGER
 }

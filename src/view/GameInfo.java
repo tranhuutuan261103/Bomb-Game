@@ -127,10 +127,10 @@ public class GameInfo implements Runnable {
 		Font customFont = new Font(Font.SANS_SERIF, Font.BOLD, 16);
 		g2d.setFont(customFont);
 		
-		g2d.drawString(_gameManager.getAICharacter().getHeart() + "", 140, margin + 188);
-		g2d.drawString(_gameManager.getAICharacter().getBombs() + "", 140, margin + 210);
-		g2d.drawString(_gameManager.getAICharacter().getBombImpactLength() + "", 140, margin + 231);
-		g2d.drawString(_gameManager.getAICharacter().getA() + "", 140, margin + 253);
+		g2d.drawString(_gameManager.getAICharacters().get(0).getHeart() + "", 140, margin + 188);
+		g2d.drawString(_gameManager.getAICharacters().get(0).getBombs() + "", 140, margin + 210);
+		g2d.drawString(_gameManager.getAICharacters().get(0).getBombImpactLength() + "", 140, margin + 231);
+		g2d.drawString(_gameManager.getAICharacters().get(0).getA() + "", 140, margin + 253);
 	}
 	
 	@Override

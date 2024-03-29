@@ -6,15 +6,18 @@ import java.awt.Toolkit;
 
 public class Boom implements Runnable {
 	private GameManager _gameManager;
+	private CharacterBase _character;
 	private int _row;
 	private int _col;
 	private int _timeCountDown;
+	private boolean _isDestroyed = false;
 	
-	public Boom(int row, int col, int timeCountDown, GameManager gameManager) {
+	public Boom(int row, int col, int timeCountDown, GameManager gameManager, CharacterBase character) {
 		_gameManager = gameManager;
+		_character = character;
 		_row = row;
 		_col = col;
-		_timeCountDown = timeCountDown;
+		_timeCountDown = timeCountDown * 1000;
 		
 		Thread thread = new Thread(this);
 		thread.start();
@@ -24,18 +27,22 @@ public class Boom implements Runnable {
 	public void run() {
 		try {
 			while(true) {
-				if (_timeCountDown == 0) {
-					_gameManager.boomBoomBoom(this);
+				if (_timeCountDown == 0 || _isDestroyed == true) {
+					_isDestroyed = true;
 					break;
 				} else {
-					_timeCountDown--;
+					_timeCountDown-=10;
 				}
-				Thread.sleep(1000);
+				Thread.sleep(10);
 			}
-			_gameManager.removeBoom(this);
+			_gameManager.makeBombExplode(this);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public CharacterBase getCharacter(){
+		return _character;
 	}
 
 	public int get_row() {
@@ -56,6 +63,14 @@ public class Boom implements Runnable {
 
 	public int getTimeCountDown() {
 		return _timeCountDown;
+	}
+
+	public void set_isDestroyed(boolean isDestroyed) {
+		_isDestroyed = isDestroyed;
+	}
+
+	public boolean get_isDestroyed() {
+		return _isDestroyed;
 	}
 
 	public void renderUI(Graphics2D g2d) {

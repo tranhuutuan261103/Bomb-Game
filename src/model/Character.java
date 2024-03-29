@@ -15,10 +15,15 @@ public class Character extends CharacterBase implements Runnable{
 	public void run() {
 		while(true) {
 			try {
+                if (heart > 0) {
+                    hitByBomb();
+                } else {
+                    System.out.println("Game Over");
+                    break;
+                }
 				reduceSpeed();
 				reduceShieldDuration();
 				getItemGift();
-				checkDie();
 				Thread.sleep(10);
 				if (isOutOfBounds(x + vx, 0, (_gameManager.getMap().getMatrixMap().length - 1) * 40))
 					continue;
