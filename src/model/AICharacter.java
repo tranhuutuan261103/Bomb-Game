@@ -2,6 +2,7 @@ package model;
 
 import utils.Direction;
 import utils.DirectionPoint;
+import model.item.Item;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -64,6 +65,15 @@ public class AICharacter extends CharacterBase implements Runnable {
 				} else {
 					grid[row][col] = State.VERYDANGER;
 				}
+			}
+		}
+
+		for (int i = 0; i < _gameManager.getItems().size(); i++) {
+			Item item = _gameManager.getItems().get(i);
+			int row = item.getX();
+			int col = item.getY();
+			if (grid[row][col] == State.SAFE) {
+				grid[row][col] = State.CANGETITEM;
 			}
 		}
 
@@ -176,7 +186,11 @@ public class AICharacter extends CharacterBase implements Runnable {
 		newPath.add(new Point((int) (x / 40), (int) (y / 40)));
 		int depth = 0;
 		if (this.getBombs() == 0 || this.getPlantedBombCount() == this.getPlantedBombLimit()){
-			dfsHelper(State.SAFE, grid, newPath, depth);
+			if (canReachTo(State.CANGETITEM, createGrid(), (int) (x / 40), (int) (y / 40), 10)) {
+				dfsHelper(State.CANGETITEM, grid, newPath, depth);
+			} else {
+				dfsHelper(State.SAFE, grid, newPath, depth);
+			}
 		} else {
 			dfsHelper(State.DESTROYABLE, grid, newPath, depth);
 		}
@@ -190,14 +204,16 @@ public class AICharacter extends CharacterBase implements Runnable {
 			return;
 		}
 
-		if (grid[last.x][last.y] == State.SAFE && endCondition == State.SAFE) {
+		if (endCondition == State.CANGETITEM && grid[last.x][last.y] == State.CANGETITEM) {
+			return;
+		} else if (endCondition == State.SAFE && grid[last.x][last.y] == State.SAFE) {
 			return;
 		} else if (endCondition == State.DESTROYABLE) {
 			if ((last.x + 1 < numRow && grid[last.x + 1][last.y] == endCondition)
 			|| (last.x > 0 && grid[last.x - 1][last.y] == endCondition)
 			|| (last.y + 1 < numCol && grid[last.x][last.y + 1] == endCondition)
 			|| (last.y > 0 && grid[last.x][last.y - 1] == endCondition)) {
-				if (path.size() > 1 && endCondition == State.DESTROYABLE) {
+				if (path.size() > 0 && endCondition == State.DESTROYABLE) {
 					planted_bomb = true;
 					return;
 				}
@@ -215,7 +231,7 @@ public class AICharacter extends CharacterBase implements Runnable {
 			if (x < 0 || x >= numRow || y < 0 || y >= numCol) {
 				continue;
 			}
-			if (grid[x][y] == State.SAFE) {
+			if (grid[x][y] == State.SAFE || grid[x][y] == State.CANGETITEM) {
 				path.add(new Point(x, y));
 				_directions.add(directionPoint.direction);
 				found = true;
@@ -249,6 +265,25 @@ public class AICharacter extends CharacterBase implements Runnable {
 
 		depth += 1;
 		dfsHelper(endCondition, grid, path, depth);
+	}
+
+	private boolean canReachTo(State endState, State[][] grid, int x, int y, int maxDepth) {
+		if (x < 0 || x >= numRow || y < 0 || y >= numCol || grid[x][y] == State.UNREACHABLE || grid[x][y] == State.VERYDANGER || grid[x][y] == State.FOUND || maxDepth == 0) {
+			return false;
+		}
+
+		if (grid[x][y] == endState) {
+			return true;
+		}
+
+		grid[x][y] = State.FOUND;
+		for (DirectionPoint directionPoint : _directionPoints) {
+			if (canReachTo(endState, grid, x + directionPoint.point.x, y + directionPoint.point.y, maxDepth - 1)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -286,5 +321,5 @@ public class AICharacter extends CharacterBase implements Runnable {
 }
 
 enum State {
-	SAFE, UNSAFE, DESTROYABLE, UNREACHABLE, FOUND, VERYDANGER
+	UNREACHABLE, VERYDANGER, UNSAFE, SAFE, DESTROYABLE, FOUND, CANGETITEM
 }

@@ -37,7 +37,7 @@ public class GameInfo implements Runnable {
 				Graphics2D g2d = (Graphics2D) g;
 				g2d.setStroke(new java.awt.BasicStroke(2));
 				
-				drawCharacterInnfo(g2d);
+				drawCharacterInfo(g2d);
 				Image matchImg = Toolkit.getDefaultToolkit().getImage("src/images/match.png");
 				g2d.drawImage(matchImg, 72, 175, 50, 50,this);
 				drawAICharacterInnfo(g2d);
@@ -102,7 +102,7 @@ public class GameInfo implements Runnable {
 		return _gameInfoPanel;
 	}
 	
-	private void drawCharacterInnfo(Graphics2D g2d) {
+	private void drawCharacterInfo(Graphics2D g2d) {
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		
 		Image image = Toolkit.getDefaultToolkit().getImage("src/images/klee_profile.png");
