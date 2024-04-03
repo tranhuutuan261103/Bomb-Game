@@ -59,6 +59,7 @@ public class GamePlay implements KeyListener, Runnable {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		Character character = _gameManager.getCharacter();
+		if (character.getHeart() <= 0) return;
 		switch (e.getKeyChar()) {
 		case 'w':
 			character.setVy(-character.getA());

@@ -92,8 +92,10 @@ public class GameManager {
 	}
 
 	public void renderItems(Graphics2D g2d) {
-		for (Item item : _items) {
-			item.renderUI(g2d);
+		synchronized(_items) {
+			for (Item item : _items) {
+				item.renderUI(g2d);
+			}
 		}
 	}
 
@@ -181,7 +183,7 @@ public class GameManager {
 			_items.add(new Item(row, col, ItemType.BOMB));
 		} else if (randomValue >= 0.7 && randomValue < 0.8) {
 			_items.add(new Item(row, col, ItemType.ACCUARY));
-		} else if (randomValue >= 0.8 && randomValue < 0.8) {
+		} else if (randomValue >= 0.8 && randomValue < 0.9) {
 			_items.add(new Item(row, col, ItemType.SPEED));
 		}
 	}

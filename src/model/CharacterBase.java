@@ -39,8 +39,8 @@ public class CharacterBase {
 		this.y = y;
 		this.vx = 0;
 		this.vy = 0;
-		this.setHeart(1);
-		this.setBombs(100);
+		this.heart = 1;
+		this.bombs = 10;
 	}
 
 	public CharacterBase(String characterName, int x, int y, GameManager gameManager, String characterImage) {
@@ -51,8 +51,8 @@ public class CharacterBase {
 		this.y = y;
 		this.vx = 0;
 		this.vy = 0;
-		this.setHeart(1);
-		this.setBombs(100);
+		this.heart = 1;
+		this.bombs = 10;
 	}
 	
 	public int getX() {
@@ -111,36 +111,38 @@ public class CharacterBase {
         int col = (int)(y + 20) / 40;
         Item removedItem = null;
         synchronized(_gameManager.getItems()) {
-	    	for (Item itemGift : _gameManager.getItems()) {
-	    		if (itemGift.getX() == row && itemGift.getY() == col) {
-	    			if (itemGift.getType() == ItemType.HEART) {
-	    				if (heart < 3)
-	    					heart += 1;
-	    				removedItem = itemGift;
-	    				break;
-	    			} else if (itemGift.getType() == ItemType.BOMB) {
-	    				bombs += 1;
-	    				removedItem = itemGift;
-	    				break;
-	    			} else if (itemGift.getType() == ItemType.ACCUARY) {
-	    				if (bombImpactLength < 3)
-	    					bombImpactLength += 1;
-	    				removedItem = itemGift;
-	    				break;
-	    			} else if (itemGift.getType() == ItemType.SPEED) {
-	    				if (a < 4) {
-	    					a *= 2;
-	    					aDuration = 1000;
-	    				}
-	    				removedItem = itemGift;
-	    				break;
-	    			}
+	    	Iterator<Item> iterator = _gameManager.getItems().iterator();
+        		while (iterator.hasNext()) {
+					Item itemGift = iterator.next();
+					if (itemGift.getX() == row && itemGift.getY() == col) {
+						if (itemGift.getType() == ItemType.HEART) {
+							if (heart < 3)
+								heart += 1;
+							removedItem = itemGift;
+							break;
+						} else if (itemGift.getType() == ItemType.BOMB) {
+							bombs += 1;
+							removedItem = itemGift;
+							break;
+						} else if (itemGift.getType() == ItemType.ACCUARY) {
+							if (bombImpactLength < 3)
+								bombImpactLength += 1;
+							removedItem = itemGift;
+							break;
+						} else if (itemGift.getType() == ItemType.SPEED) {
+							if (a < 4) {
+								a *= 2;
+								aDuration = 1000;
+							}
+							removedItem = itemGift;
+							break;
+						}
+					}
 	    		}
+				if (removedItem != null) {
+					iterator.remove(); // Use iterator to remove the item
+				}
     		}
-		}
-    	if (removedItem != null) {
-    		_gameManager.getItems().remove(removedItem);
-    	}
     }
     
     protected void hitByBomb() {
