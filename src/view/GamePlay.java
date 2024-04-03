@@ -5,11 +5,15 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JPanel;
 
 import model.Character;
 import model.GameManager;
+
+import javax.sound.sampled.*;
 
 public class GamePlay implements KeyListener, Runnable {
 	//private ViewMain _viewMain;
@@ -44,10 +48,33 @@ public class GamePlay implements KeyListener, Runnable {
 		_gamePlayPanel.setSize(_gameManager.getMap().getMatrixMap().length * 40, _gameManager.getMap().getMatrixMap()[0].length * 40);
 		Thread thread = new Thread(this);
 		thread.start();
+		soundForGamePlay();
 	}
 	
 	public JPanel getGamePlayPanel() {
 		return _gamePlayPanel;
+	}
+
+	private void soundForGamePlay() {
+		String relativePath = "src/sounds/klee-theme.wav";
+	    String absolutePath = new File(relativePath).getAbsolutePath();
+	    File file = new File(absolutePath);
+	    try {
+			AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
+			Clip clip = AudioSystem.getClip();
+			clip.open(audioStream);
+			
+			clip.start();
+		} catch (UnsupportedAudioFileException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (LineUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

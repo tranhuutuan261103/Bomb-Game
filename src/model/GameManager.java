@@ -1,5 +1,6 @@
 package model;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -17,6 +18,11 @@ public class GameManager {
 	private ArrayList<BoomEffect> _boomEffects;
 	private ArrayList<Item> _items;
 	private ArrayList<DirectionPoint> _directionPoints = new ArrayList<>(){
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		{
 			add(new DirectionPoint(Direction.UP, new Point(0, -1)));
 			add(new DirectionPoint(Direction.DOWN, new Point(0, 1)));
@@ -24,6 +30,9 @@ public class GameManager {
 			add(new DirectionPoint(Direction.RIGHT, new Point(1, 0)));
 		}
 	};
+	
+	private SoundManager _bombSound;
+	private SoundManager _itemSound;
 	
 	public GameManager() {
 		reset();
@@ -36,9 +45,20 @@ public class GameManager {
 		_items = new ArrayList<>();
 		_character = new Character("Klee", 0, 0, this);
 		_aiCharacters = new ArrayList<>();
-		_aiCharacters.add(new AICharacter("Slime Electro", 0, (_map.getMatrixMap()[0].length - 1) * 40, this, "src/images/characters/slime_electro-removebg.png"));
-		_aiCharacters.add(new AICharacter("Slime Dendro", (_map.getMatrixMap().length - 1) * 40, 0, this, "src/images/characters/slime_dendro-removebg.png"));
-		_aiCharacters.add(new AICharacter("Slime Hydro", (_map.getMatrixMap().length - 1) * 40, (_map.getMatrixMap()[0].length - 1) * 40, this, "src/images/characters/slime_hydro-removebg.png"));
+		_aiCharacters.add(new AICharacter("Slime Electro", 0, (_map.getMatrixMap()[0].length - 1) * 40, this, "src/images/characters/slime_electro-removebg.png", "src/images/characters/slime_electro.jpg", new Color(117, 98, 201)));
+		_aiCharacters.add(new AICharacter("Slime Dendro", (_map.getMatrixMap().length - 1) * 40, 0, this, "src/images/characters/slime_dendro-removebg.png", "src/images/characters/slime_dendro.jpg", new Color(168, 242, 94)));
+		_aiCharacters.add(new AICharacter("Slime Hydro", (_map.getMatrixMap().length - 1) * 40, (_map.getMatrixMap()[0].length - 1) * 40, this, "src/images/characters/slime_hydro-removebg.png", "src/images/characters/slime_hydro.png", new Color(44, 157, 225)));
+		
+		String[] setBombSoundPaths = new String[3];
+		setBombSoundPaths[0] = "src/sounds/klee-bomb-bomb-bakudan.wav";
+		setBombSoundPaths[1] = "src/sounds/klee-zenbu-dokaaa.wav";
+		setBombSoundPaths[2] = "src/sounds/klee-hajikilo.wav";
+		_bombSound = new SoundManager(setBombSoundPaths);
+		
+		String[] getItemSoundPaths = new String[2];
+		getItemSoundPaths[0] = "src/sounds/klee-yoisho.wav";
+		getItemSoundPaths[1] = "src/sounds/klee-are.wav";
+		_itemSound = new SoundManager(getItemSoundPaths);
 	}
 	
 	public Character getCharacter() {
@@ -63,6 +83,20 @@ public class GameManager {
 	
 	public ArrayList<BoomEffect> getBoomEffects() {
 		return _boomEffects;
+	}
+	
+	public SoundManager get_itemSound() {
+		return _itemSound;
+	}
+
+	public void set_itemSound(SoundManager _itemSound) {
+		this._itemSound = _itemSound;
+	}
+	
+	public void getItemSoundRequire(CharacterBase character) {
+		if (character == _character) {
+			_itemSound.playVoiceRandomly();
+		}
 	}
 	
 	public void renderAICharacter(Graphics2D g2d) {
@@ -107,6 +141,8 @@ public class GameManager {
 			this._character.setBombs(_character.getBombs() - 1);
 			_booms.add(boom);
 			addBoomEffects(boom);
+			
+			_bombSound.playVoiceRandomly();
 		}
 	}
 
@@ -183,7 +219,7 @@ public class GameManager {
 			_items.add(new Item(row, col, ItemType.BOMB));
 		} else if (randomValue >= 0.7 && randomValue < 0.8) {
 			_items.add(new Item(row, col, ItemType.ACCUARY));
-		} else if (randomValue >= 0.8 && randomValue < 0.9) {
+		} else if (randomValue >= 0.8 && randomValue < 0.8) {
 			_items.add(new Item(row, col, ItemType.SPEED));
 		}
 	}
