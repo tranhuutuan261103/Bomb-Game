@@ -7,6 +7,7 @@ import model.item.Item;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.awt.Point;
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -16,6 +17,11 @@ public class AICharacter extends CharacterBase implements Runnable {
 	private LinkedList<Point> _path = new LinkedList<Point>();
 	private LinkedList<DirectionPoint> _directionPoints = 
 		new LinkedList<DirectionPoint>() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
 			{
 				add(new DirectionPoint(Direction.UP, new Point(0, -1)));
 				add(new DirectionPoint(Direction.DOWN, new Point(0, 1)));
@@ -29,8 +35,8 @@ public class AICharacter extends CharacterBase implements Runnable {
 	private int numRow = 15;
 	private int numCol = 13;
 
-	public AICharacter(String characterName, int x, int y, GameManager gameManager, String characterImage) {
-		super(characterName, x, y, gameManager, characterImage);
+	public AICharacter(String characterName, int x, int y, GameManager gameManager, String characterImage, String avatar, Color backColorProfile) {
+		super(characterName, x, y, gameManager, characterImage, avatar, backColorProfile);
 
 		numRow = gameManager.getMap().getMatrixMap().length;
 		numCol = gameManager.getMap().getMatrixMap()[0].length;

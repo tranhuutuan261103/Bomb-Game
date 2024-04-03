@@ -42,7 +42,7 @@ public class ViewMain {
 		_view.addKeyListener(gamePlayContainer);
 		_view.add(gamePlayContainer.getGamePlayPanel(), BorderLayout.CENTER);
 		
-		gameInfoContainer = new GameInfo(_gameManager);
+		gameInfoContainer = new GameInfo(this);
 		_view.add(gameInfoContainer.getGameInfoPanel(), BorderLayout.EAST);
 		
 		Dimension gamePlayContainerSize = gamePlayContainer.getGamePlayPanel().getSize();
@@ -56,5 +56,13 @@ public class ViewMain {
 	
 	public JFrame getView() {
 		return _view;
+	}
+	
+	public void resetGame() {
+		_gameManager = new GameManager();
+	}
+	
+	public GameManager getGameManager() {
+		return _gameManager;
 	}
 }
